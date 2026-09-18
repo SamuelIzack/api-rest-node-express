@@ -1,84 +1,103 @@
+import mongoose from "mongoose";
 import { autor }  from "../models/autor.js";
+import NaoEncontrado from "../Erros/NaoEncontrado.js";
 
 class AutorController {
 
     // Lista todos os autores cadastrados.
-    static async listarAutores(req, res){
+    static async listarAutores(req, res, next){
         try{
+
             const listaDeAutores = await autor.find({});
 
+            if(listaDeAutores.length === 0){
+                return res.status(200).json({message: `Nenhum autor cadastrado.`});
+            }
+
             res.status(200).json(listaDeAutores);
+
         }catch(erro){
-            res.status(500).json({message: `Erro ao listar os autores.`});    
+            returnnext(erro);
         }
     }
 
 
     // Busca um autor pelo ID informado na URL.
-    static async listarAutorId(req, res){
+    static async listarAutorId(req, res, next){
         try{
             const id = req.params.id;
             
             const autorEncontrado = await autor.findById(id);
 
             if (!autorEncontrado){
-                return res.status(404).json({ mensagem: "Autor não encontrado." }); 
-            }
+                return next(new NaoEncontrado(`Id do autor não encontrado`))
+            };
 
-            res.status(200).json(autorEncontrado); 
+            res.status(200).json(autorEncontrado);
+             
         }catch(erro){
-            res.status(400).json({message: `ID do autor inválido.`})
+            next(erro);
         }
     }
 
 
     // Cadastra um novo autor com os dados enviados na requisição.
-    static async cadastrarAutor(req, res){
+    static async cadastrarAutor(req, res, next){
         try{
-            const novoAutor = await autor.create(req.body)
 
-            res.status(201).json({message: `Autor cadastrado com sucesso`, autor: novoAutor});
+            const autorCriado = await autor.create(req.body)
+
+            // const recebeBody = req.body
+
+            //     const criandoAutor = {
+            //         ...recebeBody, nacionalidade: req.body.nacionalidade ?? "Não cadastrada"
+            //     }
+
+            //     await autor.create(criandoAutor);
+            
+
+            res.status(201).json({message: `Autor cadastrado com sucesso`, autor: autorCriado});
+
         }catch(erro){
-            res.status(400).json({message: `Dados do autor inválidos.`});
+            next(erro);
         }
     }
 
 
     // Atualiza um autor existente pelo ID.
-    static async atualizarAutor(req, res){
+    static async atualizarAutor(req, res, next){
         try{
             const id = req.params.id;
 
             const autorAtualizado = await autor.findByIdAndUpdate(id, req.body, {new: true});
 
             if (!autorAtualizado){
-                return res.status(404).json({ mensagem: "Autor não encontrado." }); 
-            }
+                return next(new NaoEncontrado(`Id do autor não encontrado`))
+            };
 
-            res.status(200).json({message: `Autor atualizado com sucesso.`, autor: autorAtualizado})
+            res.status(200).json({message: `Autor atualizado com sucesso.`, autor: autorAtualizado});
 
 
         }catch(erro){
-            res.status(400).json({message: `ID ou dados do autor inválidos.`})
+            next(erro);
         }
     }
 
-
     // Remove um autor pelo ID informado na URL.
-    static async deletarAutor(req, res){
+    static async deletarAutor(req, res, next){
         try{
             const id = req.params.id;
 
             const autorDeletado = await autor.findByIdAndDelete(id);
 
             if (!autorDeletado){
-                return res.status(404).json({ mensagem: "Autor não encontrado." }); 
+                return next(new NaoEncontrado(`Id do autor não encontrado`))
             }
 
             res.status(200).json({message: `Autor removido com sucesso`});
             
         }catch(erro){
-            res.status(500).json({message: `ID do autor inválido `})
+            next(erro);
         }
     }
     

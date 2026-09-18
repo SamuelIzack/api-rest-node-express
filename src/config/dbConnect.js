@@ -8,7 +8,7 @@ dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 async function conectaNaDB() {
 
-    mongoose.connect(process.env.DB_CONNECTION_STRING);
+    await mongoose.connect(process.env.DB_CONNECTION_STRING);
     return mongoose.connection;
 }
 
