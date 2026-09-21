@@ -8,17 +8,17 @@ import manipulador404 from "./Middlewares/manipulador404.js";
 const conexão = await conectaNaDB();
 //Monitora possíveis erros durante a conexão com o banco 
 conexão.on("error", (error) =>{
-    console.error("Erro conexão", error)
+    console.error("Erro na conexão com o banco de dados:", error)
 });
 
 // Confirma quando a conexão com o banco é estabelecida
 conexão.once("open", () => {
-    console.log("Conexão com banco feita com sucesso");
+    console.log("Conexão com o banco de dados estabelecida com sucesso.");
 });
 
 const app = express();
 
-//Registras as rotas na aplicação Express
+// Registra as rotas na aplicação Express
 routes(app);
 
 //Caso a rota seja inexistente cria um erro 404 e envia pro manipulador de erros

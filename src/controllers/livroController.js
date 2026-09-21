@@ -2,18 +2,22 @@ import  livro  from "../models/livros.js"
 import { autor } from "../models/autor.js"
 import NaoEncontrado from "../Erros/NaoEncontrado.js";
 
+// Escapa caracteres especiais para que o texto seja tratado literalmente numa RegExp
+function escaparRegex(texto){
+    return String(texto).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 class LivroController {
 
     // Busca todos os livros cadastros no banco de dados 
     static async listarLivros (req, res, next) {
         try{
-            const listaLivros = await livro.find({}); 
+            const buscarLivros = livro.find();
 
-            if(listaLivros.length === 0){
-                return res.status(200).json({message: `Nenhum livro cadastrado.`})
-            }
+            req.resultado = buscarLivros;
 
-            res.status(200).json(listaLivros);
+            next()
+
         }catch(erro){
             next(erro);
         }
@@ -26,7 +30,7 @@ class LivroController {
             const livroPorId = await livro.findById(id); 
 
             if (!livroPorId){
-                return next(new NaoEncontrado("Livro não encontrado." ))
+                return next(new NaoEncontrado("Livro não encontrado."))
             }
 
             res.status(200).json(livroPorId);
@@ -44,13 +48,13 @@ class LivroController {
             const autorDoLivro = await autor.findById(novoLivro.autor);
             
             if (!autorDoLivro) {
-                return next( new NaoEncontrado("Autor não encontrado. Não e possivel cadastrar um livro sem o seu autor"))
+                return next( new NaoEncontrado("Autor não encontrado. Não é possível cadastrar um livro sem o seu autor."))
             }
 
             const livroCompleto = { ...novoLivro, autor: { ...autorDoLivro._doc}};
             const livroCriado = await livro.create(livroCompleto);
 
-            res.status(201).json({mensagem: "Livro criado com sucesso", livro: livroCriado});
+            res.status(201).json({mensagem: "Livro cadastrado com sucesso.", livro: livroCriado});
             
         } catch (erro){
             next(erro);
@@ -62,10 +66,10 @@ class LivroController {
         try{
             const id = req.params.id;
             
-            const livroAtualizado = await livro.findByIdAndUpdate( id, req.body, { new: true } );  
+            const livroAtualizado = await livro.findByIdAndUpdate( id, req.body, { new: true, runValidators: true } );  
 
             if (!livroAtualizado){
-                return next( new NaoEncontrado("Livro não encontrado." ))
+                return next( new NaoEncontrado("Livro não encontrado."))
             }
 
             res.status(200).json({mensagem: "Livro atualizado com sucesso.", livro: livroAtualizado});
@@ -84,10 +88,10 @@ class LivroController {
             const livroDeletado = await livro.findByIdAndDelete(id);
 
             if (!livroDeletado){
-                return next( new NaoEncontrado("Livro não encontrado." ))
+                return next( new NaoEncontrado("Livro não encontrado."))
             }
 
-            res.status(200).json({mensagem: "Livro Deletado com sucesso."});
+            res.status(200).json({mensagem: "Livro removido com sucesso."});
 
         }catch(erro){
             next(erro);
@@ -96,17 +100,20 @@ class LivroController {
 
     }
 
-    // Filtra livros pela editora e exibe
-    static async buscarLivroEditor(req, res, next){
-        const editora = req.query.editora;
+    // Filtra livros por editora e/ou título
+    static async buscarLivroFiltro(req, res, next){
         try{
-            const livrosPorEditora = await livro.find({editora: editora});
+            const { editora, titulo } = req.query;
 
-            if(livrosPorEditora.length === 0){
-                return next( new NaoEncontrado("Editora não encontrada" ))
-            }
+            const busca = {};
 
-            res.status(200).json(livrosPorEditora);
+            if(editora) busca.editora = new RegExp(escaparRegex(editora), "i");
+            if(titulo) busca.titulo = new RegExp(escaparRegex(titulo), "i");
+
+            // Não executa a query aqui: o middleware de paginação aplica sort/skip/limit e executa
+            req.resultado = livro.find(busca);
+
+            next();
         }catch(erro){
             next(erro);
         }
@@ -119,13 +126,13 @@ class LivroController {
             const autorEncontrado = await autor.findOne({ nome: nomeDoAutor})
 
             if(!autorEncontrado){
-                return next( new NaoEncontrado("Autor não encontrado" ))
+                return next( new NaoEncontrado("Autor não encontrado."))
             }
 
             const livrosDoAutor = await livro.find({ "autor._id": autorEncontrado._id});
 
             if(livrosDoAutor.length === 0 ){
-                return res.status(200).json({message: "O Autor não contém livros"});
+                return res.status(200).json({mensagem: "O autor informado não possui livros cadastrados."});
             }    
 
             res.status(200).json(livrosDoAutor);

@@ -8,7 +8,7 @@ import autor from "./autoresRoutes.js";
 const routes = (app) => {
 
     // Define a rota principal da API
-    app.route("/").get((req, res) => res.status(200).send("Curso de Node.js"));
+    app.route("/").get((req, res) => res.status(200).send("API REST em funcionamento."));
     
     // Habilita o recebimento de JSON e registra as rotas 
     // relacionadas a livros e autores na aplicação

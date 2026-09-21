@@ -1,9 +1,9 @@
-import ResquisicaoIncorreta from "./RequisicaoIncorreta.js";
+import RequisicaoIncorreta from "./RequisicaoIncorreta.js";
 
-class ErroDeValidacao extends ResquisicaoIncorreta {
+class ErroDeValidacao extends RequisicaoIncorreta {
     constructor(erro){
         const mensagemErro = Object.values(erro.errors).map(erro => erro.message).join("; ") 
-        super(`Erros encontrados: ${mensagemErro}`)
+        super(`Erro de validação: ${mensagemErro}`);
     }    
 }
 
