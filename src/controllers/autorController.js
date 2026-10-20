@@ -72,7 +72,7 @@ class AutorController {
                 return next(new NaoEncontrado("Autor não encontrado."));
             };
 
-            responder(res, 201, autorAtualizado, {mensagem: "Autor atualizado com sucesso."})
+            responder(res, 200, autorAtualizado, {mensagem: "Autor atualizado com sucesso."})
 
 
         }catch(erro){
@@ -90,7 +90,7 @@ class AutorController {
             if (!autorDeletado){
                 return next(new NaoEncontrado("Autor não encontrado."));
             }
-            responder(res, 200, [], {mensagem: "Autor removido com sucesso."})
+            responder(res, 200, null, {mensagem: "Autor removido com sucesso."})
             
         }catch(erro){
             next(erro);
