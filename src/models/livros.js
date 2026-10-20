@@ -6,6 +6,10 @@ const livroSchema = new mongoose.Schema({
         type: String, 
         required: [true, "O título é um campo obrigatório."]
     },
+    capa:{
+        type: String,
+        trim: true  
+    },
     editora: {
         type: String,
         required: [true, "A editora é um campo obrigatório."]
