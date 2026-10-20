@@ -1,32 +1,47 @@
 import RequisicaoIncorreta from "../Erros/RequisicaoIncorreta.js";
+import responder from "../utils/responder.js";
+
+// Quantidade máxima de itens por página, evita requisições como ?limite=1000000
+const LIMITE_MAXIMO = 50;
 
 async function paginar (req, res, next){
   try{
         const limite = parseInt(req.query.limite ?? 5);
-        const paginas = parseInt(req.query.paginas ?? 1);
+        const pagina = parseInt(req.query.pagina ?? 1);
         const ordenacao = req.query.ordenacao || "_id:1";
 
         let [campoOrdem, ordem = "1"] = ordenacao.split(":");
 
         ordem = parseInt(ordem);
 
-        if(!(limite > 0) || !(paginas > 0) || (ordem !== 1 && ordem !== -1)){
+        if(!(limite > 0) || !(pagina > 0) || (ordem !== 1 && ordem !== -1)){
             return next(new RequisicaoIncorreta("Parâmetros de paginação inválidos."));
+        }
+
+        if(limite > LIMITE_MAXIMO){
+            return next(new RequisicaoIncorreta(`O limite máximo por página é ${LIMITE_MAXIMO}.`));
         }
 
         // Query do Mongoose (com filtros já aplicados) preparada pelo controller
         const resultado = req.resultado;
 
+        // Conta todos os documentos que atendem ao filtro, ignorando skip e limit
+        const total = await resultado.model.countDocuments(resultado.getFilter());
+
         const lista = await resultado
         .sort({ [campoOrdem]: ordem })
-        .skip((paginas - 1) * limite)
+        .skip((pagina - 1) * limite)
         .limit(limite);
 
-        if(lista.length === 0){
-            return res.status(200).json({mensagem: "Nenhum resultado encontrado."});
-        }
+        const paginacao = {
+            pagina,
+            limite,
+            total,
+            totalPaginas: Math.ceil(total / limite)
+        };
 
-        res.status(200).json(lista);
+        return responder(res, 200, lista, {mensagem: "Resultados encontrados.", paginacao})
+
     }catch(erro){
         next(erro)
     }

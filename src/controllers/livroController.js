@@ -130,13 +130,11 @@ class LivroController {
                 return next( new NaoEncontrado("Autor não encontrado."))
             }
 
-            const livrosDoAutor = await livro.find({ "autor._id": autorEncontrado._id});
+            // Não executa a query aqui: o middleware de paginação aplica sort/skip/limit e executa
+            req.resultado = livro.find({ "autor._id": autorEncontrado._id});
 
-            if(livrosDoAutor.length === 0 ){
-                return res.status(200).json({mensagem: "O autor informado não possui livros cadastrados."});
-            }    
+            next();
 
-            res.status(200).json(livrosDoAutor);
         }catch(erro){
             next(erro);
         }
