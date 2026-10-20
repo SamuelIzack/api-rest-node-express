@@ -1,5 +1,6 @@
 import { autor }  from "../models/autor.js";
 import NaoEncontrado from "../Erros/NaoEncontrado.js";
+import responder from "../utils/responder.js";
 
 class AutorController {
 
@@ -28,8 +29,8 @@ class AutorController {
             if (!autorEncontrado){
                 return next(new NaoEncontrado("Autor não encontrado."));
             };
-
-            res.status(200).json(autorEncontrado);
+            responder(res, 200, autorEncontrado, {mensagem: "Autor encontrado."})
+            
              
         }catch(erro){
             next(erro);
@@ -51,8 +52,8 @@ class AutorController {
 
             //     await autor.create(criandoAutor);
             
+            responder(res, 201, autorCriado, {mensagem: "Autor criado com sucesso."})
 
-            res.status(201).json({mensagem: "Autor cadastrado com sucesso.", autor: autorCriado});
 
         }catch(erro){
             next(erro);
@@ -71,7 +72,7 @@ class AutorController {
                 return next(new NaoEncontrado("Autor não encontrado."));
             };
 
-            res.status(200).json({mensagem: "Autor atualizado com sucesso.", autor: autorAtualizado});
+            responder(res, 201, autorAtualizado, {mensagem: "Autor atualizado com sucesso."})
 
 
         }catch(erro){
@@ -89,8 +90,7 @@ class AutorController {
             if (!autorDeletado){
                 return next(new NaoEncontrado("Autor não encontrado."));
             }
-
-            res.status(200).json({mensagem: "Autor removido com sucesso."});
+            responder(res, 200, [], {mensagem: "Autor removido com sucesso."})
             
         }catch(erro){
             next(erro);

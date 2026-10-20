@@ -1,6 +1,7 @@
 import  livro  from "../models/livros.js"
 import { autor } from "../models/autor.js"
 import NaoEncontrado from "../Erros/NaoEncontrado.js";
+import responder from "../utils/responder.js";
 
 // Escapa caracteres especiais para que o texto seja tratado literalmente numa RegExp
 function escaparRegex(texto){
@@ -32,8 +33,7 @@ class LivroController {
             if (!livroPorId){
                 return next(new NaoEncontrado("Livro não encontrado."))
             }
-
-            res.status(200).json(livroPorId);
+            responder(res, 200, livroPorId, {mensagem: "Livro encontrado."})
 
         }catch(erro){
             next(erro);
@@ -54,7 +54,8 @@ class LivroController {
             const livroCompleto = { ...novoLivro, autor: { ...autorDoLivro._doc}};
             const livroCriado = await livro.create(livroCompleto);
 
-            res.status(201).json({mensagem: "Livro cadastrado com sucesso.", livro: livroCriado});
+            responder(res, 201, livroCriado, {mensagem: "Livro cadastrado com sucesso."})
+           
             
         } catch (erro){
             next(erro);
@@ -71,8 +72,8 @@ class LivroController {
             if (!livroAtualizado){
                 return next( new NaoEncontrado("Livro não encontrado."))
             }
-
-            res.status(200).json({mensagem: "Livro atualizado com sucesso.", livro: livroAtualizado});
+            
+            responder(res, 200, livroAtualizado, {mensagem: "Livro atualizado com sucesso."})
 
         }catch(erro){
             next(erro);
@@ -91,7 +92,7 @@ class LivroController {
                 return next( new NaoEncontrado("Livro não encontrado."))
             }
 
-            res.status(200).json({mensagem: "Livro removido com sucesso."});
+            responder(res, 200, null, {mensagem: "Livro removido com sucesso."})
 
         }catch(erro){
             next(erro);
