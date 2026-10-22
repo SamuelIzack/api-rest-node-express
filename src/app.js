@@ -3,8 +3,7 @@ import manipuladorDeErros from "./Middlewares/manipuladorDeErros.js";
 import conectaNaDB from "./config/dbConnect.js"; 
 import routes from "./routes/index.js";
 import manipulador404 from "./Middlewares/manipulador404.js";
-import cors from "./Middlewares/cors.js"
-//import cors from "cors";
+import cors from "cors";
 
 
 const conexão = await conectaNaDB();
@@ -18,11 +17,10 @@ conexão.once("open", () => {
     console.log("Conexão com o banco de dados estabelecida com sucesso.");
 });
 
-
 const app = express();
 
-//app.use(cors({origin: process.env.CORS_ORIGIN}));
-app.use(cors)
+app.use(cors({origin: process.env.CORS_ORIGIN}));
+
 // Registra as rotas na aplicação Express
 routes(app);
 
